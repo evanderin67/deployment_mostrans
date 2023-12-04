@@ -1,0 +1,8 @@
+streamlit
+pandas == 1.5.3
+numpy == 1.23.5
+scikit-learn == 1.2.2
+ortools == 9.6.2534
+scipy == 1.11.1
+gspread == 5.11.3
+oauth2client == 4.1.3
