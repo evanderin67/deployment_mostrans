@@ -1509,7 +1509,8 @@ if st.button('**Run Engine**') :
                 # st.markdown('**Berikut adalah sisa vehicle yang tidak digunakan**')
                 # df_vehicle_sisa_soft_report
                 st.markdown('**Soft Constraint Done**')
-
+                
+    recommendation_ranking = pd.DataFrame()
     if len(schedule_hard) > 0:
         # Read Input yang akan digunakan untuk rekomendasi vehicle
         # sheet_id = '1dHMcwlYez_MAthxEX52QspZ0dcI8pnoqMcIWsuYtBd4'
