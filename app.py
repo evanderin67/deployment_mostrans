@@ -1554,18 +1554,20 @@ if st.button('**Run Engine**') :
         df_order['id_order'] = df_order['id_order'].fillna(np.nan).astype(str, errors ='ignore')
         schedule_hard['id_order'] = schedule_hard['id_order'].fillna(np.nan).astype(str, errors ='ignore')
         df_order = df_order[~(df_order['id_order'].isin(schedule_hard['id_order'].unique().tolist()))].reset_index(drop = True)
-        
-        # Group customer constraint
-        df_order = pd.merge(df_order, df_mlocation[['lokasi','constraint_tahun']],how= 'left' ,left_on='asal', right_on='lokasi').drop(columns='lokasi').rename(columns= {'constraint_tahun' : 'constraint_asal'}) \
-        .merge(df_mlocation[['lokasi','constraint_tahun']],how= 'left' ,left_on='tujuan', right_on='lokasi').drop(columns='lokasi').rename(columns= {'constraint_tahun' : 'constraint_tujuan'})
-        df_order['constraint_tahun'] = df_order[['constraint_asal', 'constraint_tujuan']].max(axis=1).fillna(0)
-        
-        # Masukkan ke fungsi
-        df_vehicle_combination = vehicle_restriction(df_order, df_vehicle, df_transporter)
-        df_rekomendasi_vehicle_top3 = recommendation_vehicle(df_vehicle_combination)
-        recommendation_ranking = df_rekomendasi_vehicle_top3.copy()
-        sheet_recommendation_vehicle.clear()
-        sheet_recommendation_vehicle.update([df_rekomendasi_vehicle_top3.columns.values.tolist()] + df_rekomendasi_vehicle_top3.fillna("NaN").values.tolist())
+        if len(df_order) == 0 :
+            pass
+        else :
+            # Group customer constraint
+            df_order = pd.merge(df_order, df_mlocation[['lokasi','constraint_tahun']],how= 'left' ,left_on='asal', right_on='lokasi').drop(columns='lokasi').rename(columns= {'constraint_tahun' : 'constraint_asal'}) \
+            .merge(df_mlocation[['lokasi','constraint_tahun']],how= 'left' ,left_on='tujuan', right_on='lokasi').drop(columns='lokasi').rename(columns= {'constraint_tahun' : 'constraint_tujuan'})
+            df_order['constraint_tahun'] = df_order[['constraint_asal', 'constraint_tujuan']].max(axis=1).fillna(0)
+            
+            # Masukkan ke fungsi
+            df_vehicle_combination = vehicle_restriction(df_order, df_vehicle, df_transporter)
+            df_rekomendasi_vehicle_top3 = recommendation_vehicle(df_vehicle_combination)
+            recommendation_ranking = df_rekomendasi_vehicle_top3.copy()
+            sheet_recommendation_vehicle.clear()
+            sheet_recommendation_vehicle.update([df_rekomendasi_vehicle_top3.columns.values.tolist()] + df_rekomendasi_vehicle_top3.fillna("NaN").values.tolist())
     else :
         # Read Input yang akan digunakan untuk rekomendasi vehicle
         # sheet_id = '1dHMcwlYez_MAthxEX52QspZ0dcI8pnoqMcIWsuYtBd4'
