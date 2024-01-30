@@ -90,10 +90,12 @@ def vehicle_restriction(order, vehicle, transporter_route):
                 order_notrouting.loc[len(order_notrouting)] = order.loc[index]
         else :
             order_notrouting.loc[len(order_notrouting)] = order.loc[index]
-    
-    # Create master combination (join dengan order dan vehicle)
-    master = pd.merge(list_vehicle[['nopol', 'id_order']], order, how = 'left', on = 'id_order').merge(vehicle, how ='left', on = 'nopol')
-    master['unique_id'] = master['nopol'] + master['id_order']
+    if len(list_vehicle) > 0:
+        # Create master combination (join dengan order dan vehicle)
+        master = pd.merge(list_vehicle[['nopol', 'id_order']], order, how = 'left', on = 'id_order').merge(vehicle, how ='left', on = 'nopol')
+        master['unique_id'] = master['nopol'] + master['id_order']
+    else :
+        master = pd.DataFrame()
     return master
 
 def recommendation_vehicle(vehicle_combination):
@@ -866,15 +868,20 @@ if st.button('**Run Engine**') :
     # Define each Sheet
     # sheet_routing_hard_constraint = sheet.worksheet('routing_hard_constraint')
     sheet_recommendation_vehicle_hard_constraint = sheet.worksheet('recommendation_vehicle_hard_constraint')
+    sheet_recommendation_vehicle_hard_constraint.clear()
     # sheet_not_feasible_hard_constraint = sheet.worksheet('not_feasible_hard_constraint')
     # sheet_remaining_vehicle_hard_constraint = sheet.worksheet('remaining_vehicle_hard_constraint')
     sheet_recommendation_vehicle = sheet.worksheet('recommendation_vehicle')
+    sheet_recommendation_vehicle.clear()
     # sheet_routing_soft_constraint = sheet.worksheet('routing_soft_constraint')
     sheet_recommendation_vehicle_soft_constraint = sheet.worksheet('recommendation_vehicle_soft_constraint')
+    sheet_recommendation_vehicle_soft_constraint.clear()
     # sheet_not_feasible_soft_constraint = sheet.worksheet('not_feasible_soft_constraint')
     # sheet_remaining_vehicle_soft_constraint = sheet.worksheet('remaining_vehicle_soft_constraint')
     sheet_not_routing = sheet.worksheet('not_routing')
+    sheet_not_routing.clear()
     sheet_vehicle_sisa = sheet.worksheet('vehicle_sisa')
+    sheet_vehicle_sisa.clear()
     start_hitung = tm.time()
 
     # Import Data dari spreadsheet
@@ -1565,10 +1572,13 @@ if st.button('**Run Engine**') :
             
             # Masukkan ke fungsi
             df_vehicle_combination = vehicle_restriction(df_order, df_vehicle, df_transporter)
-            df_rekomendasi_vehicle_top3 = recommendation_vehicle(df_vehicle_combination)
-            recommendation_ranking = df_rekomendasi_vehicle_top3.copy()
-            sheet_recommendation_vehicle.clear()
-            sheet_recommendation_vehicle.update([df_rekomendasi_vehicle_top3.columns.values.tolist()] + df_rekomendasi_vehicle_top3.fillna("NaN").values.tolist())
+            if len(df_vehicle_combination) == 0:
+                recommendation_ranking = pd.DataFrame()
+            else :
+                df_rekomendasi_vehicle_top3 = recommendation_vehicle(df_vehicle_combination)
+                recommendation_ranking = df_rekomendasi_vehicle_top3.copy()
+                sheet_recommendation_vehicle.clear()
+                sheet_recommendation_vehicle.update([df_rekomendasi_vehicle_top3.columns.values.tolist()] + df_rekomendasi_vehicle_top3.fillna("NaN").values.tolist())
     else :
         # Read Input yang akan digunakan untuk rekomendasi vehicle
         # sheet_id = '1dHMcwlYez_MAthxEX52QspZ0dcI8pnoqMcIWsuYtBd4'
@@ -1598,7 +1608,7 @@ if st.button('**Run Engine**') :
         df_mvehicle['tahun_kendaraan'] = pd.to_numeric(df_mvehicle['tahun_kendaraan'], errors='coerce', downcast='integer').fillna(min_year).astype(int)
         df_vehicle = df_vehicle.dropna(subset=['nopol', 'vehicle_type', 'nama_transporter', 'last_position', 'kota',
             'latitude_last', 'longitude_last']).drop_duplicates(subset = ['nopol']).reset_index(drop = True)
-        df_vehicle = pd.merge(df_vehicle, df_mvehicle[['nopol','plan_awal','tahun_kendaraan']], how='left', on='nopol')
+        df_vehicle = pd.merge(df_vehicle, df_mvehicle[['nopol','plan_awal','active_flag','tahun_kendaraan']], how='left', on='nopol')
         df_vehicle['tahun_kendaraan'] = df_vehicle['tahun_kendaraan'].fillna(min_year).astype(int)
         # Filter kendaraan yang gapunya plan awal & active
         df_vehicle = df_vehicle[(df_vehicle['plan_awal'].isnull()) & (df_vehicle['active_flag'] == True)].reset_index(drop = True)
@@ -1617,10 +1627,13 @@ if st.button('**Run Engine**') :
 
         # Masukkan ke fungsi
         df_vehicle_combination = vehicle_restriction(df_order, df_vehicle, df_transporter)
-        df_rekomendasi_vehicle_top3 = recommendation_vehicle(df_vehicle_combination)
-        recommendation_ranking = df_rekomendasi_vehicle_top3.copy()
-        sheet_recommendation_vehicle.clear()
-        sheet_recommendation_vehicle.update([df_rekomendasi_vehicle_top3.columns.values.tolist()] + df_rekomendasi_vehicle_top3.fillna("NaN").values.tolist())
+        if len(df_vehicle_combination) == 0:
+            recommendation_ranking = pd.DataFrame()
+        else :
+            df_rekomendasi_vehicle_top3 = recommendation_vehicle(df_vehicle_combination)
+            recommendation_ranking = df_rekomendasi_vehicle_top3.copy()
+            sheet_recommendation_vehicle.clear()
+            sheet_recommendation_vehicle.update([df_rekomendasi_vehicle_top3.columns.values.tolist()] + df_rekomendasi_vehicle_top3.fillna("NaN").values.tolist())
     
     # Update ke google sheet (sisa order dan sisa kendaraan)
     order_planning = []
