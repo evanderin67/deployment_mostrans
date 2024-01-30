@@ -945,7 +945,7 @@ if st.button('**Run Engine**') :
     df_vehicle_idle = df_vehicle_idle[['nopol', 'vehicle_type','nama_transporter','nama_pool', 'mapping_lokasi','mapping_rules' ,'rules_pool',
                                                             'latitude_pool', 'longitude_pool', 'last_position','kota' ,'latitude_last', 'longitude_last', 'speed_last',
                                                             'speed_depot','tahun_kendaraan'
-                                                            ]].rename(columns = {'last_position' : 'location'})
+                                                            ]].rename(columns = {'last_position' : 'location'}).drop_duplicates(subset= 'nopol').reset_index(drop = True)
     # Convert Data type
     for column in list_column_date:
         df_order[column] = pd.to_datetime(df_order[column])
@@ -1549,7 +1549,7 @@ if st.button('**Run Engine**') :
         df_mvehicle['tahun_kendaraan'] = pd.to_numeric(df_mvehicle['tahun_kendaraan'], errors='coerce', downcast='integer').fillna(min_year).astype(int)
         df_vehicle = df_vehicle.dropna(subset=['nopol', 'vehicle_type', 'nama_transporter', 'last_position', 'kota',
             'latitude_last', 'longitude_last']).drop_duplicates(subset = ['nopol']).reset_index(drop = True)
-        df_vehicle = pd.merge(df_vehicle, df_mvehicle[['nopol','plan_awal','active_flag','tahun_kendaraan']], how='left', on='nopol')
+        df_vehicle = pd.merge(df_vehicle, df_mvehicle[['nopol','plan_awal','active_flag','tahun_kendaraan']], how='left', on='nopol').drop_duplicates(subset= 'nopol').reset_index(drop = True)
         df_vehicle['tahun_kendaraan'] = df_vehicle['tahun_kendaraan'].fillna(min_year).astype(int)
         # Filter kendaraan yang gapunya plan awal & active
         df_vehicle = df_vehicle[(df_vehicle['plan_awal'].isnull()) & (df_vehicle['active_flag'] == True)].reset_index(drop = True)
@@ -1608,7 +1608,7 @@ if st.button('**Run Engine**') :
         df_mvehicle['tahun_kendaraan'] = pd.to_numeric(df_mvehicle['tahun_kendaraan'], errors='coerce', downcast='integer').fillna(min_year).astype(int)
         df_vehicle = df_vehicle.dropna(subset=['nopol', 'vehicle_type', 'nama_transporter', 'last_position', 'kota',
             'latitude_last', 'longitude_last']).drop_duplicates(subset = ['nopol']).reset_index(drop = True)
-        df_vehicle = pd.merge(df_vehicle, df_mvehicle[['nopol','active_flag','plan_awal','tahun_kendaraan']], how='left', on='nopol')
+        df_vehicle = pd.merge(df_vehicle, df_mvehicle[['nopol','active_flag','plan_awal','tahun_kendaraan']], how='left', on='nopol').drop_duplicates(subset= 'nopol').reset_index(drop = True)
         df_vehicle['tahun_kendaraan'] = df_vehicle['tahun_kendaraan'].fillna(min_year).astype(int)
         # Filter kendaraan yang gapunya plan awal & active
         df_vehicle = df_vehicle[(df_vehicle['plan_awal'].isnull()) & (df_vehicle['active_flag'] == True)].reset_index(drop = True)
