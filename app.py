@@ -1562,7 +1562,7 @@ if st.button('**Run Engine**') :
         df_order['id_order'] = df_order['id_order'].fillna(np.nan).astype(str, errors ='ignore')
         schedule_hard['id_order'] = schedule_hard['id_order'].fillna(np.nan).astype(str, errors ='ignore')
         df_order = df_order[~(df_order['id_order'].isin(schedule_hard['id_order'].unique().tolist()))].reset_index(drop = True)
-        if len(df_order) == 0 :
+        if len(df_order) ==0 :
             pass
         else :
             # Group customer constraint
@@ -1608,7 +1608,7 @@ if st.button('**Run Engine**') :
         df_mvehicle['tahun_kendaraan'] = pd.to_numeric(df_mvehicle['tahun_kendaraan'], errors='coerce', downcast='integer').fillna(min_year).astype(int)
         df_vehicle = df_vehicle.dropna(subset=['nopol', 'vehicle_type', 'nama_transporter', 'last_position', 'kota',
             'latitude_last', 'longitude_last']).drop_duplicates(subset = ['nopol']).reset_index(drop = True)
-        df_vehicle = pd.merge(df_vehicle, df_mvehicle[['nopol','plan_awal','active_flag','tahun_kendaraan']], how='left', on='nopol')
+        df_vehicle = pd.merge(df_vehicle, df_mvehicle[['nopol','active_flag','plan_awal','tahun_kendaraan']], how='left', on='nopol')
         df_vehicle['tahun_kendaraan'] = df_vehicle['tahun_kendaraan'].fillna(min_year).astype(int)
         # Filter kendaraan yang gapunya plan awal & active
         df_vehicle = df_vehicle[(df_vehicle['plan_awal'].isnull()) & (df_vehicle['active_flag'] == True)].reset_index(drop = True)
@@ -1625,6 +1625,7 @@ if st.button('**Run Engine**') :
         .merge(df_mlocation[['lokasi','constraint_tahun']],how= 'left' ,left_on='tujuan', right_on='lokasi').drop(columns='lokasi').rename(columns= {'constraint_tahun' : 'constraint_tujuan'})
         df_order['constraint_tahun'] = df_order[['constraint_asal', 'constraint_tujuan']].max(axis=1).fillna(0)
 
+
         # Masukkan ke fungsi
         df_vehicle_combination = vehicle_restriction(df_order, df_vehicle, df_transporter)
         if len(df_vehicle_combination) == 0:
@@ -1634,7 +1635,7 @@ if st.button('**Run Engine**') :
             recommendation_ranking = df_rekomendasi_vehicle_top3.copy()
             sheet_recommendation_vehicle.clear()
             sheet_recommendation_vehicle.update([df_rekomendasi_vehicle_top3.columns.values.tolist()] + df_rekomendasi_vehicle_top3.fillna("NaN").values.tolist())
-    
+
     # Update ke google sheet (sisa order dan sisa kendaraan)
     order_planning = []
     vehicle_planning = []
